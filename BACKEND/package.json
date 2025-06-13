@@ -1,0 +1,16 @@
+{
+    "name": "iot_dashboard_backend",
+    "version": "1.0.0",
+    "description": "AWS Lambda backend for IoT Pulse project",
+    "main": "src/index.js",
+    "dependencies": {
+        "aws-sdk": "^2.1415.0",
+        "bcryptjs": "^3.0.2",
+        "dotenv": "^16.5.0",
+        "jsonwebtoken": "^9.0.2",
+        "uuid": "^9.0.0"
+    },
+    "scripts": {
+        "install-and-zip": "npm install && zip -r ../iot_dashboard_backend.zip . -x \"*.git*\" \"*.DS_Store\""
+    }
+}

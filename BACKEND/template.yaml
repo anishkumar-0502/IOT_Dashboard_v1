@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: IoT Backend Lambda for Device Data Handling
+
+Globals:
+  Function:
+    Timeout: 10
+    Runtime: nodejs18.x
+    MemorySize: 128
+
+Resources:
+  IoTBackendFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: iot-backend-handler
+      Handler: src/index.handler
+      CodeUri: .
+      Environment:
+        Variables:
+          JWT_SECRET: 29e17f7f82204d1125659bb74315a62fa3d7a8d223a6b0be718734e6f5f57447
+          DEVICE_DATA_TABLE: DeviceData
+          USERS_TABLE: Users
+          AWS_REGION: ap-south-1
+          LOG_LEVEL: debug
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY

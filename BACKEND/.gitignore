@@ -1,0 +1,34 @@
+# Node modules
+node_modules/
+.aws-sam/
+
+# Environment variables and secrets
+.env
+.env.local
+.env.production
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS/system files
+.DS_Store
+Thumbs.db
+
+# AWS deployment artifacts
+*.zip
+dist/
+build/
+
+# IDE and editor folders
+.vscode/
+.idea/
+*.swp
+
+# Lambda test events or temp files
+event.json
+temp/
+.cache/
