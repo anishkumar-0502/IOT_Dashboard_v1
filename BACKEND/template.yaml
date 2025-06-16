@@ -1,10 +1,10 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: IoT Backend Lambda for Device Data Handling
+Description: IoT Pulse Backend - Lambda Functions for Device Data and Status Handling
 
 Globals:
   Function:
-    Timeout: 10
+    Timeout: 30
     Runtime: nodejs18.x
     MemorySize: 128
 
@@ -13,7 +13,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: iot-backend-handler
-      Handler: src/index.handler
+      Handler: index.handler
       CodeUri: .
       Environment:
         Variables:
@@ -28,3 +28,64 @@ Resources:
           Properties:
             Path: /{proxy+}
             Method: ANY
+
+  DeviceStatusFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: device-status-handler
+      Handler: handlers/device-status/getStatus.handler
+      CodeUri: .
+      Environment:
+        Variables:
+          JWT_SECRET: 29e17f7f82204d1125659bb74315a62fa3d7a8d223a6b0be718734e6f5f57447
+          DEVICE_DATA_TABLE: DeviceData
+          AWS_REGION: ap-south-1
+          LOG_LEVEL: debug
+      Events:
+        GetDeviceStatus:
+          Type: Api
+          Properties:
+            Path: /device-status/{deviceId}
+            Method: GET
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaBasicExecution
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:*:*:*"
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "dynamodb:Scan"
+                  - "dynamodb:PutItem"
+                  - "dynamodb:GetItem"
+                  - "dynamodb:UpdateItem"
+                  - "dynamodb:DeleteItem"
+                Resource:
+                  - Fn::Sub: "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/DeviceData"
+                  - Fn::Sub: "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/Users"
+
+Outputs:
+  ApiUrl:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: 
+      Fn::Sub: "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"

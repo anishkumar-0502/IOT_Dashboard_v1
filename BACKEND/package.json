@@ -2,15 +2,19 @@
     "name": "iot_dashboard_backend",
     "version": "1.0.0",
     "description": "AWS Lambda backend for IoT Pulse project",
-    "main": "src/index.js",
+    "main": "index.js",
     "dependencies": {
-        "aws-sdk": "^2.1415.0",
-        "bcryptjs": "^3.0.2",
-        "dotenv": "^16.5.0",
+        "aws-sdk": "^2.1692.0",
+        "bcryptjs": "^2.4.3",
+        "dotenv": "^16.4.5",
         "jsonwebtoken": "^9.0.2",
         "uuid": "^9.0.0"
     },
+    "devDependencies": {
+        "lambda-local": "^2.2.0"
+    },
     "scripts": {
-        "install-and-zip": "npm install && zip -r ../iot_dashboard_backend.zip . -x \"*.git*\" \"*.DS_Store\""
+        "start": "IS_LOCAL=true lambda-local -l index.js -h handler -e event.json --timeout 30 --region ap-south-1",
+        "zip": "zip -r ../iot_dashboard_backend.zip config handlers middleware routes utils index.js package.json package-lock.json node_modules -x '*.git*' '*node_modules/.cache*' '*temp_dir*'"
     }
 }
