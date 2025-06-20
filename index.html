@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Device Data Viewer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    pre {
+      background-color: white;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      max-width: 90%;
+      overflow-x: auto;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+    .info {
+      color: #555;
+      font-style: italic;
+      max-width: 90%;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Device Data Viewer</h1>
+  <button onclick="fetchDeviceData()">Get Device Data</button>
+  <pre id="dataOutput"></pre>
+  <p id="infoMessage" class="info"></p>
+
+  <script>
+    async function fetchDeviceData() {
+      const outputElement = document.getElementById('dataOutput');
+      const infoElement = document.getElementById('infoMessage');
+      outputElement.textContent = 'Loading...';
+      infoElement.textContent = '';
+
+      try {
+        const response = await fetch('https://etue6cmucd.execute-api.ap-south-1.amazonaws.com/S1/device-data', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        outputElement.textContent = JSON.stringify(data, null, 2); // Pretty-print JSON
+        infoElement.textContent = 'Data fetched successfully!';
+      } catch (error) {
+        outputElement.classList.add('error');
+        outputElement.textContent = `Error: ${error.message}`;
+        
+        // Check for CORS-related errors
+        if (error.message.includes('CORS') || error.message.includes('Access-Control-Allow-Origin')) {
+          infoElement.textContent = 'CORS issue detected. Please enable CORS on your API Gateway endpoint. See instructions in the console.';
+          console.error('CORS Issue: To fix this, enable CORS in your AWS API Gateway console for the /S1/device-data resource. Steps:\n' +
+            '1. Go to the API Gateway console.\n' +
+            '2. Select your API and navigate to the /S1/device-data resource.\n' +
+            '3. Click "Actions" > "Enable CORS".\n' +
+            '4. Deploy your API to apply changes.');
+        } else if (error.message.includes('403')) {
+          infoElement.textContent = 'Authentication issue (403 Forbidden). Please add your API key or token in the script.';
+          console.error('Authentication Issue: If your API requires an API key or token, add it in the headers of the fetch request.');
+        } else {
+          infoElement.textContent = 'An unexpected error occurred. Check the console for details.';
+          console.error('Fetch error:', error);
+        }
+      }
+    }
+  </script>
+</body>
+</html>
